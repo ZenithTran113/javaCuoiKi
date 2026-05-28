@@ -27,7 +27,6 @@ public class TetrisModel {
         this.highScore = loadHighScore();
     }
 
-    // --- PHẦN FILE I/O ---
     private void saveHighScore() {
         if (score > highScore) {
             highScore = score;
@@ -50,7 +49,6 @@ public class TetrisModel {
         }
     }
 
-    // --- HÀM TẤN CÔNG (DÂNG GẠCH RÁC) ---
     public void addGarbageLine() {
         for (int i = 0; i < ROWS - 1; i++) {
             board[i] = board[i + 1].clone();
@@ -71,8 +69,6 @@ public class TetrisModel {
         if (!canMove(currentShape, curX, curY)) {
             isGameOver = true;
             saveHighScore();
-            // Lưu ý: Không gọi JOptionPane ở đây vì sẽ làm treo luồng Socket
-            // Việc hiện bảng báo thua sẽ do handleResult trong Controller quản lý
         }
     }
 
@@ -101,9 +97,6 @@ public class TetrisModel {
                 rotated[j][currentShape.length - 1 - i] = currentShape[i][j];
         if (canMove(rotated, curX, curY)) currentShape = rotated;
     }
-//Đây là thuật toán hoán đổi vị trí các ô từ mảng cũ sang mảng mới:
-//Nó duyệt qua từng ô của khối gạch hiện tại (currentShape[i][j]).
-//Tính toán vị trí mới của ô đó sau khi xoay 90 độ bằng công thức: Hàng mới = Cột cũ (j) và Cột mới = (Tổng số hàng - 1) - Hàng cũ (i).
     private boolean canMove(int[][] shape, int nextX, int nextY) {
         for (int i = 0; i < shape.length; i++) {
             for (int j = 0; j < shape[i].length; j++) {
@@ -140,15 +133,14 @@ public class TetrisModel {
                 for (int k = i; k > 0; k--) board[k] = board[k - 1].clone();//hàng đủ
                 board[0] = new int[COLS];
                 lines++;
-                i++; // Kiểm tra lại hàng hiện tại sau khi dồn xuống
+                i++; 
             }
         }
         score += lines * 100;
-        saveHighScore(); // Lưu điểm kỷ lục mỗi khi ăn điểm
+        saveHighScore(); 
         return lines;
     }
 
-    // --- CÁC HÀM GETTER ---
     public boolean isGameOver() { return isGameOver; }
     public int[][] getBoard() { return board; }
     public int[][] getCurrentShape() { return currentShape; }
