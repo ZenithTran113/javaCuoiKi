@@ -87,11 +87,9 @@ public class TetrisSocket implements Runnable {
                 System.err.println("Lỗi đọc điểm!");
             }
         }
-        // KHI NHẬN ĐƯỢC ĐIỂM HẾT GIỜ: Cho phép cập nhật đè lên bảng đang hiển thị
         else if (msg.startsWith("SCORE_END:")) {
             try {
                 int opponentScore = Integer.parseInt(msg.substring(10));
-                // Ép luồng đồ họa cập nhật lại chữ và điểm đối thủ thực tế
                 SwingUtilities.invokeLater(() -> {
                     controller.handleResult(opponentScore);
                 });
