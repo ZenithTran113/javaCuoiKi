@@ -13,10 +13,10 @@ public class TetrisController extends KeyAdapter implements Runnable {
     private TetrisView view;
     private TetrisSocket socketManager;
     private boolean isRunning = false;
-    private int timeLeft = 60; // 60 giây đếm ngược
-    private boolean isGameOverProcessed = false; // Chống hiện thông báo nhiều lần
+    private int timeLeft = 60; 
+    private boolean isGameOverProcessed = false; 
     private boolean isMultiplayer = false;
-    private boolean isServer = false; // true = Player 1, false = Player 2
+    private boolean isServer = false; 
 
     public TetrisController(TetrisModel model, TetrisView view) {
         this.model = model;
@@ -48,7 +48,6 @@ public class TetrisController extends KeyAdapter implements Runnable {
         }
     }
 
-    // --- FIX DỨT ĐIỂM: CHỦ ĐỘNG BẬT OVERLAY KHI HẾT GIỜ, CHỐNG ĐƠ ---
     private void startCountdown() {
         new Thread(() -> {
             while (timeLeft > 0 && isRunning) {
@@ -59,17 +58,16 @@ public class TetrisController extends KeyAdapter implements Runnable {
                 view.repaint();
             }
 
-            // Khi hết giờ hoàn toàn
             if (timeLeft <= 0 && isRunning) {
-                isRunning = false; // Dừng rơi gạch
+                isRunning = false; 
 
                 if (isMultiplayer) {
-                    // 1. Báo điểm của mình cho đối thủ biết
+                    
                     socketManager.sendData("SCORE_END:" + model.getScore());
 
-                    // 2. ÉP máy mình phải tự hiện bảng kết quả đen lên ngay lập tức, tạm thời coi như đối thủ 0 điểm
+                   
                     SwingUtilities.invokeLater(() -> {
-                        this.isGameOverProcessed = false; // Cho phép hàm chạy để hiện bảng
+                        this.isGameOverProcessed = false; 
                         handleResult(-3);
                     });
                 } else {
@@ -86,14 +84,12 @@ public class TetrisController extends KeyAdapter implements Runnable {
         }
     }
 
-    // --- HÀM XỬ LÝ KẾT QUẢ ĐÃ ĐƯỢC CẬP NHẬT LOGIC ĐẬP TAN DEADLOCK ---
     public void handleResult(int opponentScore) {
         if (!SwingUtilities.isEventDispatchThread()) {
             SwingUtilities.invokeLater(() -> handleResult(opponentScore));
             return;
         }
 
-        // Nếu bảng đã hiện rồi và nhận được điểm thực tế từ mạng (-3 là mã giữ chỗ khi vừa hết giờ)
         if (isGameOverProcessed && opponentScore == -3) return;
 
         isGameOverProcessed = true;
@@ -102,7 +98,6 @@ public class TetrisController extends KeyAdapter implements Runnable {
         final int myScore = model.getScore();
         final int timePlayed = 60 - timeLeft;
 
-        // Xử lý điểm đối thủ nếu chưa nhận được gói tin mạng kịp lúc thì tạm để là 0
         int displayOpponentScore = (opponentScore >= 0) ? opponentScore : 0;
 
         String resultText;
@@ -115,10 +110,8 @@ public class TetrisController extends KeyAdapter implements Runnable {
             } else if (opponentScore == -2) {
                 resultText = "BẠN ĐÃ THẤT BẠI!";
             } else if (opponentScore == -3) {
-                // Trạng thái vừa hết giờ, đang đợi mạng cập nhật điểm đối thủ
                 resultText = "ĐANG TÍNH ĐIỂM SỐ...";
             } else {
-                // Đã có điểm thực của đối thủ từ gói tin SCORE_END
                 if (myScore > opponentScore) {
                     resultText = "BẠN ĐÃ CHIẾN THẮNG!";
                 } else if (myScore < opponentScore) {
@@ -148,7 +141,6 @@ public class TetrisController extends KeyAdapter implements Runnable {
             System.exit(0);
         };
 
-        // Mỗi lần gọi lại (kể cả khi cập nhật điểm thực tế), ta xóa overlay cũ đi vẽ lại overlay mới
         view.removeResultOverlay();
         view.repaint();
         view.showResultOverlay(isMultiplayer, resultText, myScore, displayOpponentScore, timePlayed, rematchAction, menuAction);
